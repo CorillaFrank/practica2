@@ -1,17 +1,23 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+# Etapa 1: Build
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+EXPOSE 8080
 
-COPY practica2.csproj ./
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copiar el .csproj y restaurar dependencias
+COPY ["practica2.csproj", "./"]
 RUN dotnet restore
 
-COPY . ./
-RUN dotnet publish -c Release -o out
+# Copiar el resto de archivos y compilar
+COPY . .
+RUN dotnet publish -c Release -o /app/publish
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Etapa 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
-COPY --from=build-env /app/out .
+COPY --from=build /app/publish .
 
-ENV APP_NET_CORE practica2.dll
-CMD ASPNETCORE_URLS=http://:$PORT dotnet $APP_NET_CORE
-
-
+ENV ASPNETCORE_URLS=http://+:8080
+ENTRYPOINT ["dotnet", "practica2.dll"]
