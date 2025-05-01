@@ -9,10 +9,10 @@ using practica2.Data;
 
 #nullable disable
 
-namespace practica2.Migrations
+namespace practica2.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250501032749_Inicio")]
+    [Migration("20250501062535_Inicio")]
     partial class Inicio
     {
         /// <inheritdoc />
@@ -225,6 +225,83 @@ namespace practica2.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("practica2.Models.Adopcion", b =>
+                {
+                    b.Property<int>("AdopcionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AdopcionId"));
+
+                    b.Property<int>("AdoptanteId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MascotaId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("AdopcionId");
+
+                    b.HasIndex("AdoptanteId");
+
+                    b.HasIndex("MascotaId")
+                        .IsUnique();
+
+                    b.ToTable("Adopciones");
+                });
+
+            modelBuilder.Entity("practica2.Models.Adoptante", b =>
+                {
+                    b.Property<int>("AdoptanteId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AdoptanteId"));
+
+                    b.Property<string>("CorreoElectronico")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("AdoptanteId");
+
+                    b.ToTable("Adoptantes");
+                });
+
+            modelBuilder.Entity("practica2.Models.Mascota", b =>
+                {
+                    b.Property<int>("MascotaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MascotaId"));
+
+                    b.Property<int>("Edad")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EstadoAdopcion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("MascotaId");
+
+                    b.ToTable("Mascotas");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -274,6 +351,35 @@ namespace practica2.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("practica2.Models.Adopcion", b =>
+                {
+                    b.HasOne("practica2.Models.Adoptante", "Adoptante")
+                        .WithMany("Adopciones")
+                        .HasForeignKey("AdoptanteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("practica2.Models.Mascota", "Mascota")
+                        .WithOne("Adopcion")
+                        .HasForeignKey("practica2.Models.Adopcion", "MascotaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Adoptante");
+
+                    b.Navigation("Mascota");
+                });
+
+            modelBuilder.Entity("practica2.Models.Adoptante", b =>
+                {
+                    b.Navigation("Adopciones");
+                });
+
+            modelBuilder.Entity("practica2.Models.Mascota", b =>
+                {
+                    b.Navigation("Adopcion");
                 });
 #pragma warning restore 612, 618
         }
