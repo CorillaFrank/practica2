@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
  WORKDIR /app
- 
- COPY .csproj ./
+ COPY practica2.csproj ./
+
  RUN dotnet restore
  
  COPY . ./
