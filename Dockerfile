@@ -1,18 +1,24 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
- WORKDIR /app
- 
- COPY .csproj ./
- RUN dotnet restore
- 
- COPY . ./
- RUN dotnet publish -c Release -o out
- 
- FROM mcr.microsoft.com/dotnet/aspnet:8.0
- WORKDIR /app
- COPY --from=build-env /app/out .
- 
- #CAMBIAR AQUI EL NOMBRE DEL APLICATIVO
- #nombre de tu app busca en bin\Release**\netcore5.0\plantitas.exe
- ENV APP_NET_CORE practica2.dll 
- 
- CMD ASPNETCORE_URLS=http://:$PORT dotnet $APP_NET_CORE
+# Etapa 1: Build
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 8080
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copiar el .csproj y restaurar dependencias
+COPY ["practica2.csproj", "./"]
+RUN dotnet restore
+
+# Copiar el resto de archivos y compilar
+COPY . .
+RUN dotnet publish -c Release -o /app/publish
+
+# Etapa 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+
+ENV ASPNETCORE_URLS=http://+:$PORT
+
+ENTRYPOINT ["dotnet", "practica2.dll"]
